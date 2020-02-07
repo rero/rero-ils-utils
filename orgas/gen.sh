@@ -55,7 +55,7 @@ do
   code=$(echo $orga|jq -r .code)
   name=$(echo $orga|jq -r .name)
   # write result in output
-  echo "Orga${pid} [shape=box color=\"transparent\" style=filled fillcolor=\"${ORGA_COLOR}\" label=<${name}<br/>(code: ${code})>]" >> "$output"
+  echo "Orga${pid} [shape=box color=\"transparent\" style=filled fillcolor=\"${ORGA_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]" >> "$output"
 done
 
 # LIBRARIES
@@ -73,7 +73,7 @@ do
   orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
   # write result in output
   l_id="Lib${pid}"
-  echo "${l_id} [shape=house color=transparent style=filled fillcolor=\"${LIB_COLOR}\" label=<${name}<br/>(code: ${code})>]" >> "$output"
+  echo "${l_id} [shape=house color=transparent style=filled fillcolor=\"${LIB_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]" >> "$output"
   echo "${l_id} -> Orga${orga_pid}" >> "$output"
 done
 
@@ -94,7 +94,7 @@ do
   orga=$(echo $pt|jq -r .organisation)
   # write result in output
   p_id="Type${pid}"
-  echo "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"${PT_COLOR}\" label=\"${name}\"]" >> "$output"
+  echo "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"${PT_COLOR}\" label=<${name}<br/>PID: ${pid}>]" >> "$output"
   # Make a link with organisation if present
   if [[ -n "${orga}" ]]; then
     orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
