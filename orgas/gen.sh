@@ -67,6 +67,31 @@ do
   echo "${l_id} -> Orga${orga_pid}" >> "$output"
 done
 
+# PATRON_TYPES
+pt_file="${SRC_DIR}patron_types.json"
+cat "${pt_file}" |jq -c '.[] | {
+  pid,
+  name,
+  organisation: .organisation."$ref"}'|while read pt
+do
+#  # The char " is problematic. Delete it.
+#  pt=$(echo $pt| sed -e 's/^"//g' -e 's/"$//g')
+#  pid=$(echo $pt|cut -d "|" -f 1)
+#  name=$(echo $pt|cut -d "|" -f 2)
+#  orga=$(echo $pt|cut -d "|" -f 3)
+  pid=$(echo $pt|jq -r .pid)
+  name=$(echo $pt|jq -r .name)
+  orga=$(echo $pt|jq -r .organisation)
+  # write result in output
+  p_id="Type${pid}"
+  echo "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"#baffc9\" label=\"${name}\"]" >> "$output"
+  # Make a link with organisation if present
+  if [[ -n "${orga}" ]]; then
+    orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
+    echo "${p_id} -> Orga${orga_pid}" >> "$output"
+  fi
+done
+
 # USERS
 user_file="${SRC_DIR}users.json"
 cat "${user_file}"|jq -c '.[] | {
@@ -75,7 +100,8 @@ cat "${user_file}"|jq -c '.[] | {
   last_name,
   barcode,
   roles,
-  library: .library."$ref"}'|while read user
+  library: .library."$ref",
+  pt: .patron_type."$ref"}'|while read user
 do
   email=$(echo $user|jq -r .email)
   first_name=$(echo $user|jq -r .first_name)
@@ -84,6 +110,7 @@ do
   roles=$(echo $user|jq -r .roles[])
   library=$(echo $user|jq -r .library)
   library_pid=$(echo $library|rev|cut -d "/" -f 1|rev)
+  pt=$(echo $user|jq -r .pt)
 
   if [[ "${roles}" != "null" ]]; then
     displayed_roles=""
@@ -115,6 +142,12 @@ do
   # Display a link if library_pid is not null
   if [[ "${library_pid}" != "null" ]]; then
     echo "\"${u_id}\" -> Lib${library_pid}" >> "$output"
+  fi
+
+  # Display a link if patron_type is not null
+  if [[ "$pt" != "null" ]]; then
+    pt_id=$(echo $pt|rev| cut -d "/" -f 1|rev)
+    echo "\"${u_id}\" -> Type${pt_id}" >> "$output"
   fi
 done
 
