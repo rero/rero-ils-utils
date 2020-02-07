@@ -28,6 +28,9 @@ USER_COLOR="${COLOR5}"    # users/patrons
 # Built variables
 outputfile="$1"
 SRC_DIR="${RERO_DIR}/data/"
+tmpl_gizmo="templates/gizmo.tmpl" # A colored polygon. Represents an entity.
+tmpl_link="templates/link.tmpl"   # A link between two entities.
+tmpl_label="templates/label_default.tmpl" # Default label for entities.
 
 # TESTS
 if [[ -z "${outputfile}" ]]; then
@@ -39,19 +42,29 @@ elif [[ -f "${outputfile}" ]]; then
 fi
 
 # FUNCTIONS
-# write first argument in output file
-output() {
+# WRITE first argument in output file
+send() {
   echo -e "$1" >> "$outputfile"
+}
+# render: SHOW template (given in $1) after variables REPLACEMENTS
+render() {
+  template="$(cat $1)"
+  eval "echo -e \"${template}\""
+}
+# save: WRITE template (given in $1) in outputfile after variables REPLACEMENTS
+save() {
+  rendered_template="$(render $1)"
+  send "${rendered_template}"
 }
 
 # Output file initialization
 echo "" > "$outputfile" # flush output file
-output "digraph {"
-output "rankdir = RL;"
-output "label = \"Link between organisations, libraries and users.\";"
+save "templates/header.tmpl"
 
 # ORGANISATIONS
 orga_file="${SRC_DIR}organisations.json"
+shape="box"
+color="${ORGA_COLOR}"
 cat "${orga_file}"|jq -c '.[] | { 
   name,
   pid,
@@ -62,11 +75,15 @@ do
   code=$(echo $orga|jq -r .code)
   name=$(echo $orga|jq -r .name)
   # write result in output
-  output "Orga${pid} [shape=box color=\"transparent\" style=filled fillcolor=\"${ORGA_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]"
+  identifier="Orga${pid}"
+  label="$(render ${tmpl_label})"
+  save "${tmpl_gizmo}"
 done
 
 # LIBRARIES
 lib_file="${SRC_DIR}libraries.json"
+shape="house"
+color="${LIB_COLOR}"
 cat "${lib_file}"|jq -c '.[] | {
   name,
   pid,
@@ -79,38 +96,44 @@ do
   orga=$(echo $lib|jq -r .organisation)
   orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
   # write result in output
-  l_id="Lib${pid}"
-  output "${l_id} [shape=house color=transparent style=filled fillcolor=\"${LIB_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]"
-  output "${l_id} -> Orga${orga_pid}"
+  identifier="Lib${pid}"
+  label="$(render ${tmpl_label})"
+  save "${tmpl_gizmo}"
+  relation="Orga${orga_pid}"
+  save "${tmpl_link}"
 done
 
 # PATRON_TYPES
 pt_file="${SRC_DIR}patron_types.json"
+shape="polygon"
+color="${PT_COLOR}"
+additionals="sides=7"
 cat "${pt_file}" |jq -c '.[] | {
   pid,
   name,
   organisation: .organisation."$ref"}'|while read pt
 do
-#  # The char " is problematic. Delete it.
-#  pt=$(echo $pt| sed -e 's/^"//g' -e 's/"$//g')
-#  pid=$(echo $pt|cut -d "|" -f 1)
-#  name=$(echo $pt|cut -d "|" -f 2)
-#  orga=$(echo $pt|cut -d "|" -f 3)
   pid=$(echo $pt|jq -r .pid)
   name=$(echo $pt|jq -r .name)
   orga=$(echo $pt|jq -r .organisation)
   # write result in output
-  p_id="Type${pid}"
-  output "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"${PT_COLOR}\" label=<${name}<br/>PID: ${pid}>]"
+  identifier="Type${pid}"
+  label="$(render templates/label_patron_types.tmpl)"
+  save "${tmpl_gizmo}"
+
   # Make a link with organisation if present
   if [[ -n "${orga}" ]]; then
     orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
-    output "${p_id} -> Orga${orga_pid}"
+    relation="Orga${orga_pid}"
+    save "${tmpl_link}"
   fi
 done
 
 # USERS
 user_file="${SRC_DIR}users.json"
+shape="ellipse"
+additionals=''
+color="${USER_COLOR}"
 cat "${user_file}"|jq -c '.[] | {
   email,
   first_name,
@@ -129,15 +152,13 @@ do
   library_pid=$(echo $library|rev|cut -d "/" -f 1|rev)
   pt=$(echo $user|jq -r .pt)
 
+  # Prepare additional info
   if [[ "${roles}" != "null" ]]; then
     displayed_roles="roles: "
     for role in ${roles}; do
       displayed_roles="${displayed_roles}<font color='red' >${role}</font>, "
     done
   fi
-  # write result in output
-  u_id="User_${email}"
-
   # Don't display barcode if no one
   info=""
   if [[ "${barcode}" != "null" ]]; then
@@ -148,22 +169,27 @@ do
     info="${info}<br/>${displayed_roles}"
   fi
 
-  output "\"${u_id}\" [color=transparent style=filled fillcolor=\"${USER_COLOR}\" label=<${first_name} ${last_name}<br/>${email}${info}>]"
+  # write result in output
+  identifier="User_${email}"
+  label="$(render templates/label_users.tmpl)"
+  save "${tmpl_gizmo}"
 
   # Display a link if library_pid is not null
   if [[ "${library_pid}" != "null" ]]; then
-    output "\"${u_id}\" -> Lib${library_pid}"
+    relation="Lib${library_pid}"
+    save "${tmpl_link}"
   fi
 
   # Display a link if patron_type is not null
   if [[ "$pt" != "null" ]]; then
     pt_id=$(echo $pt|rev| cut -d "/" -f 1|rev)
-    output "\"${u_id}\" -> Type${pt_id}"
+    relation="Type${pt_id}"
+    save "${tmpl_link}"
   fi
 done
 
 # end of file
-output "}"
+save "templates/footer.tmpl"
 
 
 # END of program
