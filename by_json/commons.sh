@@ -12,6 +12,14 @@ tmpl_gizmo="templates/gizmo.tmpl" # A colored polygon. Represents an entity.
 tmpl_link="templates/link.tmpl"   # A link between two entities.
 tmpl_label="templates/label_default.tmpl" # Default label for entities.
 
+# pastel colors (Cf. https://www.color-hex.com/color-palette/5361)
+COLOR1="#ffb3ba"
+COLOR2="#ffdfba"
+COLOR3="#ffffba"
+COLOR4="#baffc9"
+COLOR5="#bae1ff"
+COMP_COLOR4="#ffd8ba"
+
 # Graph info
 rankdir="RL"
 title=""
