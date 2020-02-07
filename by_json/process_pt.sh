@@ -11,7 +11,10 @@ while read pt
 do
   pid=$(echo $pt|jq -r .pid)
   name=$(echo $pt|jq -r .name)
+  # fix problems with '<' and '>' in descriptions
+  description=$(echo $pt|jq -r .description|sed -e 's/</\&#60;/g ; s/>/\&#62;/g')
   orga=$(echo $pt|jq -r .organisation)
+
   # write result in output
   identifier="Type${pid}"
   label="$(render templates/label_patron_types.tmpl)"
