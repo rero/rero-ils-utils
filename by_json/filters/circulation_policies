@@ -1,0 +1,12 @@
+.[] | {
+  pid,
+  name,
+  description,
+  organisation: .organisation."$ref",
+  allow_checkout,
+  checkout_duration,
+  allow_requests,
+  policy_library_level,
+  libraries: [.libraries[]?],
+  settings
+}

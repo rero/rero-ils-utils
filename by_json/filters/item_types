@@ -1,0 +1,6 @@
+.[] | {
+  pid,
+  name,
+  organisation: .organisation."$ref",
+  type
+}
