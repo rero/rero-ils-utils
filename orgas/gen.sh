@@ -26,22 +26,29 @@ PT_COLOR="${COLOR3}"      # patron_types
 USER_COLOR="${COLOR5}"    # users/patrons
 
 # Built variables
-output="$1"
+outputfile="$1"
 SRC_DIR="${RERO_DIR}/data/"
 
 # TESTS
-if [[ -z "${output}" ]]; then
+if [[ -z "${outputfile}" ]]; then
   echo "No output file given"
   exit 1
-elif [[ -f "${output}" ]]; then
+elif [[ -f "${outputfile}" ]]; then
   echo "File already exists!"
   exit 1
 fi
 
-# start of file
-echo "digraph {" > "$output"
-echo "rankdir = RL;" >> "$output"
-echo "label = \"Link between organisations, libraries and users.\";" >> "$output"
+# FUNCTIONS
+# write first argument in output file
+output() {
+  echo -e "$1" >> "$outputfile"
+}
+
+# Output file initialization
+echo "" > "$outputfile" # flush output file
+output "digraph {"
+output "rankdir = RL;"
+output "label = \"Link between organisations, libraries and users.\";"
 
 # ORGANISATIONS
 orga_file="${SRC_DIR}organisations.json"
@@ -55,7 +62,7 @@ do
   code=$(echo $orga|jq -r .code)
   name=$(echo $orga|jq -r .name)
   # write result in output
-  echo "Orga${pid} [shape=box color=\"transparent\" style=filled fillcolor=\"${ORGA_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]" >> "$output"
+  output "Orga${pid} [shape=box color=\"transparent\" style=filled fillcolor=\"${ORGA_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]"
 done
 
 # LIBRARIES
@@ -73,8 +80,8 @@ do
   orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
   # write result in output
   l_id="Lib${pid}"
-  echo "${l_id} [shape=house color=transparent style=filled fillcolor=\"${LIB_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]" >> "$output"
-  echo "${l_id} -> Orga${orga_pid}" >> "$output"
+  output "${l_id} [shape=house color=transparent style=filled fillcolor=\"${LIB_COLOR}\" label=<${name}<br/>(code: ${code})<br/>PID: ${pid}>]"
+  output "${l_id} -> Orga${orga_pid}"
 done
 
 # PATRON_TYPES
@@ -94,11 +101,11 @@ do
   orga=$(echo $pt|jq -r .organisation)
   # write result in output
   p_id="Type${pid}"
-  echo "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"${PT_COLOR}\" label=<${name}<br/>PID: ${pid}>]" >> "$output"
+  output "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"${PT_COLOR}\" label=<${name}<br/>PID: ${pid}>]"
   # Make a link with organisation if present
   if [[ -n "${orga}" ]]; then
     orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
-    echo "${p_id} -> Orga${orga_pid}" >> "$output"
+    output "${p_id} -> Orga${orga_pid}"
   fi
 done
 
@@ -141,22 +148,22 @@ do
     info="${info}<br/>${displayed_roles}"
   fi
 
-  echo "\"${u_id}\" [color=transparent style=filled fillcolor=\"${USER_COLOR}\" label=<${first_name} ${last_name}<br/>${email}${info}>]" >> "$output"
+  output "\"${u_id}\" [color=transparent style=filled fillcolor=\"${USER_COLOR}\" label=<${first_name} ${last_name}<br/>${email}${info}>]"
 
   # Display a link if library_pid is not null
   if [[ "${library_pid}" != "null" ]]; then
-    echo "\"${u_id}\" -> Lib${library_pid}" >> "$output"
+    output "\"${u_id}\" -> Lib${library_pid}"
   fi
 
   # Display a link if patron_type is not null
   if [[ "$pt" != "null" ]]; then
     pt_id=$(echo $pt|rev| cut -d "/" -f 1|rev)
-    echo "\"${u_id}\" -> Type${pt_id}" >> "$output"
+    output "\"${u_id}\" -> Type${pt_id}"
   fi
 done
 
 # end of file
-echo "}" >> "$output"
+output "}"
 
 
 # END of program
