@@ -3,6 +3,13 @@
 # Generate a dot file to create graph of RERO-ils data (orga, lib and users)
 #
 
+# Usage:
+#    bash gen.sh output.dot
+# where `output.dot` is the output file that permit to generate a graph.
+# To generate the graph:
+#    dot -Tsvg output.dot -o organisations.svg
+# where `output.dot` is the previous file. And `organisations.svg` the final schema you want to display.
+
 # CONFIG
 RERO_DIR="${HOME}/projets/rero/rero-ils"
 ORGA_COLOR="#bcafff"
