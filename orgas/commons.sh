@@ -40,6 +40,12 @@ save() {
   rendered_template="$(render $1)"
   send "${rendered_template}"
 }
+# parse_json: read JSON file (filename given in $1) and applying filter (same name as $1)
+parse_json() {
+  filepath="${SRC_DIR}/$1.json"
+  filter="filters/$1"
+  cat "$filepath" | jq -cf "$filter"
+}
 
 # Output file initialization
 echo "" > "$outputfile" # flush output file

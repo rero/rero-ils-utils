@@ -1,0 +1,9 @@
+.[] | {
+  email,
+  first_name,
+  last_name,
+  barcode,
+  roles,
+  library: .library."$ref",
+  pt: .patron_type."$ref"
+}

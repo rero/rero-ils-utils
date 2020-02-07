@@ -33,13 +33,9 @@ title="Link between organisations, libraries and users."
 save "templates/header.tmpl"
 
 # ORGANISATIONS
-orga_file="${SRC_DIR}organisations.json"
 shape="box"
 color="${ORGA_COLOR}"
-cat "${orga_file}"|jq -c '.[] | { 
-  name,
-  pid,
-  code }'| while read orga
+while read -r orga
 do
   # take important info
   pid=$(echo $orga|jq -r .pid)
@@ -49,17 +45,12 @@ do
   identifier="Orga${pid}"
   label="$(render ${tmpl_label})"
   save "${tmpl_gizmo}"
-done
+done <<< $(parse_json "organisations")
 
 # LIBRARIES
-lib_file="${SRC_DIR}libraries.json"
 shape="house"
 color="${LIB_COLOR}"
-cat "${lib_file}"|jq -c '.[] | {
-  name,
-  pid,
-  code,
-  organisation: .organisation."$ref"}'|while read lib
+while read -r lib
 do
   pid=$(echo $lib|jq -r .pid)
   name=$(echo $lib|jq -r .name)
@@ -72,17 +63,13 @@ do
   save "${tmpl_gizmo}"
   relation="Orga${orga_pid}"
   save "${tmpl_link}"
-done
+done <<< $(parse_json "libraries")
 
 # PATRON_TYPES
-pt_file="${SRC_DIR}patron_types.json"
 shape="polygon"
 color="${PT_COLOR}"
 additionals="sides=7"
-cat "${pt_file}" |jq -c '.[] | {
-  pid,
-  name,
-  organisation: .organisation."$ref"}'|while read pt
+while read pt
 do
   pid=$(echo $pt|jq -r .pid)
   name=$(echo $pt|jq -r .name)
@@ -98,21 +85,13 @@ do
     relation="Orga${orga_pid}"
     save "${tmpl_link}"
   fi
-done
+done <<< $(parse_json "patron_types")
 
 # USERS
-user_file="${SRC_DIR}users.json"
 shape="ellipse"
 additionals=''
 color="${USER_COLOR}"
-cat "${user_file}"|jq -c '.[] | {
-  email,
-  first_name,
-  last_name,
-  barcode,
-  roles,
-  library: .library."$ref",
-  pt: .patron_type."$ref"}'|while read user
+while read user
 do
   email=$(echo $user|jq -r .email)
   first_name=$(echo $user|jq -r .first_name)
@@ -157,11 +136,10 @@ do
     relation="Type${pt_id}"
     save "${tmpl_link}"
   fi
-done
+done <<< $(parse_json "users")
 
 # Graph footer
 save "templates/footer.tmpl"
-
 
 # END of program
 exit 0

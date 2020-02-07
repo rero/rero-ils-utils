@@ -1,6 +1,5 @@
 # TODO list
 
   * item -> item_types -> patron_types -> circulation policies + organisations
-  * patron_types on organisations.svg
   * do it in Python
   * use http://localhost:9200/patrons/_search?size=50 and similar to create all graphs? => problem: you need to launch docker-compose and load data (setup), which takes time
