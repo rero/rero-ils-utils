@@ -12,8 +12,18 @@
 
 # CONFIG
 RERO_DIR="${HOME}/projets/rero/rero-ils"
-ORGA_COLOR="#bcafff"
-LIB_COLOR="#49afff"
+# pastel colors (Cf. https://www.color-hex.com/color-palette/5361)
+COLOR1="#ffb3ba"
+COLOR2="#ffdfba"
+COLOR3="#ffffba"
+COLOR4="#baffc9"
+COLOR5="#bae1ff"
+COMP_COLOR4="#ffd8ba"
+# colors you choose for different objects
+ORGA_COLOR="${COLOR1}"    # organisations
+LIB_COLOR="${COLOR2}"     # libraries
+PT_COLOR="${COLOR3}"      # patron_types
+USER_COLOR="${COLOR5}"    # users/patrons
 
 # Built variables
 output="$1"
@@ -84,7 +94,7 @@ do
   orga=$(echo $pt|jq -r .organisation)
   # write result in output
   p_id="Type${pid}"
-  echo "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"#baffc9\" label=\"${name}\"]" >> "$output"
+  echo "${p_id} [shape="polygon" sides=7 color=transparent style=filled fillcolor=\"${PT_COLOR}\" label=\"${name}\"]" >> "$output"
   # Make a link with organisation if present
   if [[ -n "${orga}" ]]; then
     orga_pid=$(echo $orga|rev|cut -d "/" -f 1|rev)
@@ -113,15 +123,9 @@ do
   pt=$(echo $user|jq -r .pt)
 
   if [[ "${roles}" != "null" ]]; then
-    displayed_roles=""
+    displayed_roles="roles: "
     for role in ${roles}; do
-      color="black"
-      if [[ "${role}" == "system_librarian" ]]; then
-        color="${ORGA_COLOR}"
-      elif [[ "${role}" == "librarian" ]]; then
-        color="${LIB_COLOR}"
-      fi
-      displayed_roles="${displayed_roles}<font color='${color}'>${role}</font> "
+      displayed_roles="${displayed_roles}<font color='red' >${role}</font>, "
     done
   fi
   # write result in output
@@ -137,7 +141,7 @@ do
     info="${info}<br/>${displayed_roles}"
   fi
 
-  echo "\"${u_id}\" [label=<${first_name} ${last_name}<br/>${email}${info}>]" >> "$output"
+  echo "\"${u_id}\" [color=transparent style=filled fillcolor=\"${USER_COLOR}\" label=<${first_name} ${last_name}<br/>${email}${info}>]" >> "$output"
 
   # Display a link if library_pid is not null
   if [[ "${library_pid}" != "null" ]]; then
