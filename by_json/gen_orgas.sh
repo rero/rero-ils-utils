@@ -10,9 +10,6 @@
 #    dot -Tsvg output.dot -o organisations.svg
 # where `output.dot` is the previous file. And `organisations.svg` the final schema you want to display.
 
-# CONFIG
-RERO_DIR="${HOME}/projets/rero/rero-ils"
-
 # Load commons variables, functions and statements
 source commons.sh
 

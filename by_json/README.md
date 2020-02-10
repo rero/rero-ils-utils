@@ -11,11 +11,10 @@
 
 # Usage
 
-  * Open **commons.sh** file
   * change **RERO\_DIR** variable to point your **rero-ils directory**
 
 ```
-make clean && make
+make clean && RERO_DIR="/home/moi/rero/rero-ils" make
 ```
 
 Result: **2 files (orgas.svg and policies.svg)** file (can be open with Gimp for example).

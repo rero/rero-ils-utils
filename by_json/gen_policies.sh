@@ -3,9 +3,6 @@
 # Generate a dot file to create graph of RERO-ils data
 #
 
-# CONFIG
-RERO_DIR="${HOME}/projets/rero/rero-ils"
-
 # Load commons variables, functions and statements
 source commons.sh
 

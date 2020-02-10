@@ -5,6 +5,7 @@
 
 # Built variables
 outputfile="$1"
+RERO_DIR="${RERO_DIR:-${HOME}/projets/rero/rero-ils}"
 SRC_DIR="${RERO_DIR}/data/"
 
 # Templates
@@ -30,6 +31,14 @@ if [[ -z "${outputfile}" ]]; then
   exit 1
 elif [[ -f "${outputfile}" ]]; then
   echo "File already exists!"
+  exit 1
+fi
+if [[ ! -d "${RERO_DIR}" ]]; then
+  echo "Source directory doesn't exist: ${RERO_DIR}. Did you set RERO_DIR variable?"
+  exit 1
+fi
+if [[ ! -d "${SRC_DIR}" ]]; then
+  echo "No data directory found in ${RERO_DIR}. Did you set RERO_DIR variable correctly?"
   exit 1
 fi
 
