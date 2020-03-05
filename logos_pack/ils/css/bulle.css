@@ -1,0 +1,12 @@
+body#view-bulle nav.rero-ils-header {
+  background-color: #fff3f3 !important;
+}
+
+body#view-bulle nav.rero-ils-header img.rero-ils-logo {
+  display: none;
+}
+
+div#bulle-logo {
+  content: url('https://resources.rero.ch/ils/images/logo-bulle.svg');
+  max-height: 44px !important;
+}

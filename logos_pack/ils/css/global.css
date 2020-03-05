@@ -1,0 +1,12 @@
+body#view-global nav.rero-ils-header {
+  background-color: #1b4464 !important;
+}
+
+body#view-global nav.rero-ils-header img.rero-ils-logo {
+  display: none;
+}
+
+div#global-logo {
+  content: url('https://resources.rero.ch/ils/images/logo-global.svg');
+  max-height: 44px !important;
+}

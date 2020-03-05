@@ -13,3 +13,9 @@ It provides few graph generator that use JSON file in [RERO-ILS project](https:/
 [And few examples](https://github.com/rero/rero-ils/wiki/Data-graph-generation#result).
 
 It uses graphviz with `dot` command to generate graphs.
+
+# logos\_pack
+
+It creates archive files with .tgz extension that contains logos for RERO-ILS PILOT instance.
+
+There is an example of what could be done in the **Makefile** file. Use the given README.md file attached.

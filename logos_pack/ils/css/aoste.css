@@ -1,0 +1,12 @@
+body#view-aoste nav.rero-ils-header {
+  background-color: #ffd7d7 !important;
+}
+
+body#view-aoste nav.rero-ils-header img.rero-ils-logo {
+  display: none;
+}
+
+div#aoste-logo {
+  content: url('https://resources.rero.ch/ils/images/logo-aoste.svg');
+  max-height: 44px !important;
+}

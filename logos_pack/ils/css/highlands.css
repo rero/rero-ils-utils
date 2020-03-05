@@ -1,0 +1,12 @@
+body#view-highlands nav.rero-ils-header {
+  background-color: #333333 !important;
+}
+
+body#view-highlands nav.rero-ils-header img.rero-ils-logo {
+  display: none;
+}
+
+div#highlands-logo {
+  content: url('https://resources.rero.ch/ils/images/logo-highlands.svg');
+  max-height: 44px !important;
+}

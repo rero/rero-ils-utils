@@ -1,0 +1,12 @@
+body#view-rbnj nav.rero-ils-header {
+  background-color: #b44d8d !important;
+}
+
+body#view-rbnj nav.rero-ils-header img.rero-ils-logo {
+  display: none;
+}
+
+div#rbnj-logo {
+  content: url('https://resources.rero.ch/ils/images/logo-rbnj.svg');
+  max-height: 44px !important;
+}
