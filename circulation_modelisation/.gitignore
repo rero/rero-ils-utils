@@ -1,0 +1,4 @@
+*.svg
+!rero_circulation_modelisation.svg
+!loan_states.svg
+*.png

@@ -1,0 +1,61 @@
+digraph G {
+# Title
+label="Circulation state diagram";
+labelloc = "t"; # place label on top
+compound=True;
+
+# Configuration
+rankdir=LR;
+#splines=polyline; # uncurved arrows (from a state to another)
+node [shape=rectangle style=rounded]; # change displaying box for states
+
+# Main states
+"CREATED" [label="" xlabel="Loan" shape=circle style=filled color=black];
+"PENDING" [color="transparent" style=filled fillcolor="#ffb3ba"];
+"ITEM_AT_DESK" [shape=house color="transparent" style=filled fillcolor="#ffdfba"];
+"ITEM_IN_TRANSIT";
+"ITEM_ON_LOAN";
+"ITEM_RETURNED";
+"CANCELLED" [color="transparent" style=filled fillcolor="#ffb3ba"];
+"DISPUTED";
+"DELETED" [shape=doublecircle label="" style=filled fillcolor=black];
+
+# Subgraphs
+subgraph cluster_main {
+	label="";
+	"CANCELLED";
+	"ITEM_RETURNED";
+	subgraph cluster_0 {
+		# Configuration
+		node [style=filled];
+		label="";
+		color=gray;
+		# States
+		{ rank=same; "ITEM_AT_DESK", "ITEM_IN_TRANSIT"}
+		{ rank=same; "ITEM_ON_LOAN", "DISPUTED"}
+		# Transitions
+		"PENDING" -> "ITEM_ON_LOAN" [label=checkout];
+		"PENDING" -> "ITEM_AT_DESK" [label=validate];
+		"PENDING" -> "ITEM_IN_TRANSIT" [label=validate];
+		"ITEM_AT_DESK" -> "ITEM_ON_LOAN" [label=checkout];
+		"ITEM_ON_LOAN" -> "ITEM_IN_TRANSIT" [label=checkin];
+		"ITEM_ON_LOAN" -> "ITEM_ON_LOAN" [label=extend];
+		"ITEM_ON_LOAN" -> "DISPUTED";
+		"DISPUTED" -> "ITEM_ON_LOAN";
+		}
+
+		# Transition from atdesk to main cluster
+		{ rank=same; "ITEM_RETURNED", "CANCELLED"}
+		"ITEM_ON_LOAN" -> "ITEM_RETURNED" [label=checkin];
+		"ITEM_IN_TRANSIT" -> "ITEM_AT_DESK" [label=<delivery_receive>];
+		"ITEM_IN_TRANSIT" -> "ITEM_RETURNED" [label=house_receive];
+	}
+
+"CREATED" -> "PENDING" [label=request];
+"CREATED" -> "ITEM_ON_LOAN" [label=checkout];
+"ITEM_RETURNED" -> "DELETED";
+"CANCELLED" -> "DELETED";
+
+"ITEM_ON_LOAN" -> "CANCELLED" [ltail=cluster_0 color=gray];
+
+}

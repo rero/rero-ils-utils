@@ -1,0 +1,143 @@
+digraph {
+# Graph title
+label = "Circulation modelisation";
+
+# Configuration
+rankdir=LR;
+splines=polyline; # uncurved lines
+
+# Main statuses
+"on_shelf" [label=ON_SHELF];
+"pending" [label=PENDING];
+"denied" [label=DENIED];
+"item_at_desk" [label=ITEM_AT_DESK];
+"item_on_loan" [label=ITEM_ON_LOAN];
+"in_transit_for_pickup" [label=IN_TRANSIT_FOR_PICKUP];
+"in_transit_to_house" [label=IN_TRANSIT_TO_HOUSE];
+# Unknown statuses
+"do_checkin" [label=DO_A_CHECKIN];
+
+# Transitions
+# -----------
+
+# REQUESTS
+# ADD_REQUEST_1.1
+"on_shelf" -> "pending" [label=<ADD_REQUEST_1.1<br/>(🚫📚)>];
+# ADD_REQUEST_1.2.1
+"on_shelf" -> "denied" [label=<ADD_REQUEST_1.2.1<br/>(👥)>]
+# ADD_REQUEST_1.2.2
+"on_shelf" -> "pending" [label=<ADD_REQUEST_1.2.2<br/>(🚫👥)>];
+# ADD_REQUEST_2.1
+"item_at_desk" -> "denied" [label=<ADD_REQUEST_2.1<br/>(👥)>];
+# ADD_REQUEST_2.2
+"item_at_desk" -> "pending" [label=<ADD_REQUEST_2.2<br/>(🚫👥)>];
+# ADD_REQUEST_3.1
+"item_on_loan" -> "denied" [label=<ADD_REQUEST_3.1<br/>(👥)>];
+# ADD_REQUEST_3.2.1
+"item_on_loan" -> "pending" [label=<ADD_REQUEST_3.2.1<br/>(🚫👥,🚫📚)>];
+# ADD_REQUEST_3.2.2.1
+"item_on_loan" -> "denied" [label=<ADD_REQUEST_3.2.2.1<br/>(🚫👥,📚,[👥pending])>];
+# ADD_REQUEST_3.2.2.2
+"item_on_loan" -> "pending" [label=<ADD_REQUEST_3.2.2.2<br/>(🚫👥,📚,[🚫👥pending])>];
+# ADD_REQUEST_4.1
+"in_transit_for_pickup" -> "denied" [label=<ADD_REQUEST_4.1<br/>(👥)>];
+# ADD_REQUEST_4.2
+"in_transit_for_pickup" -> "pending" [label=<ADD_REQUEST_4.2<br/>(🚫👥)>];
+# ADD_REQUEST_5.1.1
+"in_transit_to_house" -> "pending" [label=<ADD_REQUEST_5.1.1<br/>(🚫📚,🚚🏠=📓🏠)>];
+# ADD_REQUEST_5.1.2
+"in_transit_to_house" -> "in_transit_for_pickup" [label=<ADD_REQUEST_5.1.2<br/>(🚫📚,🚚🏠!=📓🏠)<br/>TODO: Cancel previous loan>];
+# ADD_REQUEST_5.2.1
+"in_transit_to_house" -> "denied" [label=<ADD_REQUEST_5.2.1<br/>(📚,👥)>];
+# ADD_REQUEST_5.2.2
+"in_transit_to_house" -> "pending" [label=<ADD_REQUEST_5.2.2<br/>(📚,🚫👥)>];
+
+# CHECKOUT
+# CHECKOUT_1.1
+"on_shelf" -> "item_on_loan" [label=<CHECKOUT_1.1<br/>(🚫📚)>];
+# CHECKOUT_1.2.1
+"on_shelf" -> "item_on_loan" [label=<CHECKOUT_1.2.1<br/>(📚,<br/>checkout patron = patron of 1st pending loan)>];
+# CHECKOUT_1.2.2
+"on_shelf" -> "denied" [label=<CHECKOUT_1.2.2<br/>(📚,<br/>checkout patron != patron of 1st pending loan)>];
+# CHECKOUT_2.1
+"item_at_desk" -> "item_on_loan" [label=<CHECKOUT_2.1<br/>(checkout patron = patron of 1st pending loan)>];
+# CHECKOUT_2.2
+"item_at_desk" -> "denied" [label=<CHECKOUT_2.2<br/>(checkout patron != patron of 1st pending loan)>];
+# CHECKOUT_3.1
+"item_on_loan" -> "do_checkin" [label=<CHECKOUT_3.1<br/>(👥)>];
+# CHECKOUT_3.2
+"item_on_loan" -> "denied" [label=<CHECKOUT_3.2<br/>(🚫👥)>];
+# CHECKOUT_4.1
+"in_transit_for_pickup" -> "item_on_loan" [label=<CHECKOUT_4.1<br/>(👥)<br/>TODO: automatic receive>];
+# CHECKOUT_4.2
+"in_transit_for_pickup" -> "denied" [label=<CHECKOUT_4.2<br/>(🚫👥)>];
+# CHECKOUT_5.1
+"in_transit_to_house" -> "item_on_loan" [label=<CHECKOUT_5.1<br/>(🚫📚)<br/>TODO: cancel previous loan>];
+# CHECKOUT_5.2.1
+"in_transit_to_house" -> "item_on_loan" [label=<CHECKOUT_5.2.1<br/>(📚,<br/>checkout patron = patron of 1st pending loan)<br/>TODO: cancel previous loan>];
+# CHECKOUT_5.2.2
+"in_transit_to_house" -> "denied" [label=<CHECKOUT_5.2.2<br/>(📚,<br/>checkout patron != patron of 1st pending loan)>];
+
+# CHECKIN
+# CHECKIN_1.1.1
+"on_shelf" -> "on_shelf" [label=<CHECKIN_1.1.1<br/>(🚫📚,📓🏠=💲🏠)<br/>TODO: NO ACTION>];
+# CHECKIN_1.1.2
+"on_shelf" -> "in_transit_to_house" [label=<CHECKIN_1.1.2<br/>(🚫📚,📓🏠!=💲🏠)<br/>TODO: FIND A SOLUTION> color=red];
+# CHECKIN_1.2.1
+"on_shelf" -> "item_at_desk" [label=<CHECKIN_1.2.1<br/>(📚,<br/>1st pending loan 🚚🏠=💲🏠)<br/>TODO: validate 1st pending loan>];
+# CHECKIN_1.2.2
+"on_shelf" -> "in_transit_for_pickup" [label=<CHECKIN_1.2.2<br/>(📚,<br/>1st pending loan 🚚🏠!=💲🏠)<br/>TODO: validate 1st pending loan>];
+# CHECKIN_2.1
+"item_at_desk" -> "item_at_desk" [label=<CHECKIN_2.1<br/>(🚚🚩=💲🏠)TODO: NO ACTION>];
+# CHECKIN_2.2
+"item_at_desk" -> "in_transit_for_pickup" [label=<CHECKIN_2.2<br/>(🚚🚩!=💲🏠)<br/>TODO: FIND A SOLUTION> color=red];
+# CHECKIN_3.1.1
+"item_on_loan" -> "on_shelf" [label=<CHECKIN_3.1.1<br/>(🚫📚,📓🚩=💲🏠)>];
+# CHECKIN_3.1.2
+"item_on_loan" -> "in_transit_to_house" [label=<CHECKIN_3.1.2<br/>(🚫📚,📓🚩!=💲🏠)>];
+# CHECKIN_3.2.1
+"item_on_loan" -> "item_at_desk" [label=<CHECKIN_3.2.1<br/>(📚,<br/>1st pending loan 🚚🚩=💲🏠)>];
+# CHECKIN_3.2.2.1
+"item_on_loan" -> "in_transit_to_house" [label=<CHECKIN_3.2.2.1<br/>(📚,<br/>1st pending loan 🚚🚩!=💲🏠<br/>1st pending loan 🚚🚩=📓🏠)>];
+# CHECKIN_3.2.2.2
+"item_on_loan" -> "in_transit_for_pickup" [label=<CHECKIN_3.2.2.1<br/>(📚,<br/>1st pending loan 🚚🚩!=💲🏠<br/>1st pending loan 🚚🚩!=📓🏠)>];
+# CHECKIN_4.1
+"in_transit_for_pickup" -> "item_at_desk" [label=<CHECKIN_4.1<br/>(🚚🚩=💲🏠)>];
+# CHECKIN_4.2
+"in_transit_for_pickup" -> "in_transit_for_pickup" [label=<CHECKIN_4.2<br/>(🚚🚩!=💲🏠)<br/>TODO: NO ACTION.track intermediary checkin>];
+# CHECKIN_5.1.1
+"in_transit_to_house" -> "on_shelf" [label=<CHECKIN_5.1.1<br/>(🚫📚,📓🚩=💲🏠)>];
+# CHECKIN_5.1.2
+"in_transit_to_house" -> "in_transit_to_house" [label=<CHECKIN_5.1.2<br/>(🚫📚,📓🚩!=💲🏠)<br/>TODO: NO ACTION.track intermediary checkin>];
+# CHECKIN_5.2.1.1
+"in_transit_to_house" -> "item_at_desk" [label=<CHECKIN_5.2.1.1>];
+# CHECKIN_5.2.1.2
+"in_transit_to_house" -> "item_at_desk" [label=<CHECKIN_5.2.1.2>];
+# CHECKIN_5.2.2.1
+"in_transit_to_house" -> "in_transit_to_house" [label=<CHECKIN_5.2.2.1<br/>TODO: NO ACTION.>];
+# CHECKIN_5.2.2.2
+"in_transit_to_house" -> "in_transit_for_pickup" [label=<CHECKIN_5.2.2.2>];
+
+# Manual validate
+# VALIDATE_1.1
+"on_shelf" -> "denied" [label=<VALIDATE_1.1>];
+# VALIDATE_1.2 (2 possibilities)
+"on_shelf" -> "item_at_desk" [label=<VALIDATE_1.2>];
+"on_shelf" -> "in_transit_for_pickup" [label=<VALIDATE_1.2>];
+# VALIDATE_2
+"item_at_desk" -> "denied" [label=<VALIDATE_2>];
+# VALIDATE_3
+"item_on_loan" -> "denied" [label=<VALIDATE_3>];
+# VALIDATE_4
+"in_transit_for_pickup" -> "denied" [label=<VALIDATE_4>];
+# VALIDATE_5
+"in_transit_to_house" -> "denied" [label=<VALIDATE_5>];
+
+# EXTEND
+# EXTEND_1
+# EXTEND_2
+# EXTEND_3.1
+# EXTEND_3.2
+# EXTEND_4
+# EXTEND_5
+}
