@@ -1,0 +1,16 @@
+dist: bionic
+os: linux
+
+language: shell
+
+before_install:
+  - sudo apt-get -y install graphviz
+  - sudo wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /usr/bin/jq
+
+addons:
+  apt:
+    update: true
+
+script:
+  - ./graphs_by_json/tests.sh
+  - ./logos_pack/tests.sh
